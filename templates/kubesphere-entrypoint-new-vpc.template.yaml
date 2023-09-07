@@ -1,0 +1,460 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Deploy KubeSphere into a new EKS cluster in a new VPC (qs-1qtdde8a5).
+Metadata:
+  QuickStartDocumentation:
+    EntrypointName: "Launch into new VPC"
+    Order: 1
+    OptionalParameters:
+      - Openpitrix
+      - Devops
+      - Servicemesh
+      - Kubeedge
+      - Alerting
+      - Auditing
+      - Logging
+      - Events
+      - Multicluster
+      - Networkpolicy
+      - MetricsServer
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+    - Label:
+        default: Network configuration
+      Parameters:
+      - NumberOfAZs
+      - AvailabilityZones
+      - VPCCIDR
+      - PrivateSubnet1CIDR
+      - PrivateSubnet2CIDR
+      - PrivateSubnet3CIDR
+      - PublicSubnet1CIDR
+      - PublicSubnet2CIDR
+      - PublicSubnet3CIDR
+      - RemoteAccessCIDR
+    - Label:
+        default: Amazon EC2 configuration
+      Parameters:
+      - KeyPairName
+    - Label:
+        default: EKS configuration
+      Parameters:
+      - NodeInstanceType
+      - NumberOfNodes
+    - Label:
+        default: AWS Quick Start configuration
+      Parameters:
+      - EKSClusterName
+      - QSS3BucketName
+      - QSS3KeyPrefix
+      - QSS3BucketRegion
+      - PerAccountSharedResources
+      - PerRegionSharedResources
+    - Label:
+        default: Configures the KubeSphere system and pluggable components
+      Parameters:
+      - Openpitrix
+      - Devops
+      - Servicemesh
+      - Kubeedge
+      - Alerting
+      - Auditing
+      - Logging
+      - Events
+      - Multicluster
+      - Networkpolicy
+      - MetricsServer
+    - Label:
+        default: Amazon EC2 configuration
+      Parameters:
+        - ProvisionBastionHost
+    ParameterLabels:
+      AvailabilityZones:
+        default: Availability Zones
+      NumberOfAZs:
+        default: Number of Availability Zones
+      KeyPairName:
+        default: SSH key name
+      QSS3BucketRegion:
+        default: Quick Start S3 bucket Region
+      PrivateSubnet1CIDR:
+        default: Private subnet 1 CIDR
+      PrivateSubnet2CIDR:
+        default: Private subnet 2 CIDR
+      PrivateSubnet3CIDR:
+        default: Private subnet 3 CIDR
+      PublicSubnet1CIDR:
+        default: Public subnet 1 CIDR
+      PublicSubnet2CIDR:
+        default: Public subnet 2 CIDR
+      PublicSubnet3CIDR:
+        default: Public subnet 3 CIDR
+      EKSClusterName:
+        default: EKS cluster name
+      QSS3BucketName:
+        default: Quick Start S3 bucket name
+      QSS3KeyPrefix:
+        default: Quick Start S3 key prefix
+      RemoteAccessCIDR:
+        default: Allowed external access CIDR
+      VPCCIDR:
+        default: VPC CIDR
+      NodeInstanceType:
+        default: Node instance type
+      NumberOfNodes:
+        default: Number of nodes
+      Openpitrix:
+        default: Openpitrix
+      Devops:
+        default: Devops
+      Servicemesh:
+        default: Servicemesh
+      Kubeedge:
+        default: Kubeedge
+      Alerting:
+        default: Alerting
+      Logging:
+        default: Logging
+      Auditing:
+        default: Auditing
+      Events:
+        default: Events
+      Multicluster:
+        default: Multicluster
+      Networkpolicy:
+        default: Networkpolicy
+      MetricsServer:
+        default: MetricsServer
+      PerAccountSharedResources:
+        default: Per-account shared resources
+      PerRegionSharedResources:
+        default: Per region shared resources
+      ProvisionBastionHost:
+        default: Provision bastion host
+Parameters:
+  NumberOfAZs:
+    Type: String
+    AllowedValues: ["2", "3"]
+    Default: "3"
+    Description: 'Number of Availability Zones to use in the VPC. This must match your selections in the list for the "AvailabilityZones" parameter.'
+  AvailabilityZones:
+    Description: 'List of Availability Zones to use for the VPC subnets. Two or three Availability Zones are used for this deployment,
+      and each one should match the "NumberOfAZs" parameter.'
+    Type: List<AWS::EC2::AvailabilityZone::Name>
+  KeyPairName:
+    Description: Enter the key pair you created in your preferred AWS Region. For more information, see the "Technical requirements" section of the deployment guide.
+    Type: AWS::EC2::KeyPair::KeyName
+  PrivateSubnet1CIDR:
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16–28
+    Default: 10.0.0.0/19
+    Description: CIDR block for private subnet 1, located in Availability Zone 1.
+    Type: String
+  PrivateSubnet2CIDR:
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16–28
+    Default: 10.0.32.0/19
+    Description: CIDR block for private subnet 2, located in Availability Zone 2.
+    Type: String
+  PrivateSubnet3CIDR:
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16–28
+    Default: 10.0.64.0/19
+    Description: CIDR block for private subnet 3, located in Availability Zone 3.
+    Type: String
+  PublicSubnet1CIDR:
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16–28
+    Default: 10.0.128.0/20
+    Description: CIDR block for the public DMZ subnet 1, located in Availability Zone 1.
+    Type: String
+  PublicSubnet2CIDR:
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16–28
+    Default: 10.0.144.0/20
+    Description: CIDR block for the public DMZ subnet 2, located in Availability Zone 2.
+    Type: String
+  PublicSubnet3CIDR:
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16–28
+    Default: 10.0.160.0/20
+    Description: CIDR block for the public DMZ subnet 3, located in Availability Zone 3.
+    Type: String
+  EKSClusterName:
+    Type: String
+    Default: ""
+    Description: "(Optional) Name for the EKS cluster. If left blank, one is auto-generated. This must be unique within the Region."
+  QSS3BucketName:
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    ConstraintDescription: Quick Start bucket name can include numbers, lowercase
+      letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen
+      (-).
+    Default: aws-quickstart
+    Description: S3 bucket name for the Quick Start assets. This string can include
+      numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start
+      or end with a hyphen (-).
+    Type: String
+  QSS3KeyPrefix:
+    AllowedPattern: ^[0-9a-zA-Z-/.]*$
+    ConstraintDescription: Quick Start key prefix can include numbers, lowercase letters,
+      uppercase letters, hyphens (-), periods (.) and forward slashes (/).
+    Default: quickstart-qingcloud-kubesphere/
+    Description: The S3 key prefix for the Quick Start assets. Quick Start key prefix
+      can include numbers, lowercase letters, uppercase letters, hyphens (-), periods (.) and
+      forward slashes (/).
+    Type: String
+  QSS3BucketRegion:
+    Default: 'us-east-1'
+    Description: AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. If you use your own bucket, you must specify this value.
+    Type: String
+  RemoteAccessCIDR:
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/x
+    Description: CIDR IP range that is permitted to access the instances. We recommend
+      that you set this value to a trusted IP range.
+    Type: String
+  VPCCIDR:
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16–28
+    Default: 10.0.0.0/16
+    Description: CIDR block for the VPC
+    Type: String
+  NodeInstanceType:
+    Default: t3.xlarge
+    AllowedValues:
+      - t3.nano
+      - t3.micro
+      - t3.small
+      - t3.medium
+      - t3.large
+      - t3.xlarge
+      - t3.2xlarge
+      - m5.large
+      - m5.xlarge
+      - m5.2xlarge
+      - m5.4xlarge
+      - m5.12xlarge
+      - m5.24xlarge
+      - c5.large
+      - c5.xlarge
+      - c5.2xlarge
+      - c5.4xlarge
+      - c5.9xlarge
+      - c5.18xlarge
+      - i3.large
+      - i3.xlarge
+      - i3.2xlarge
+      - i3.4xlarge
+      - i3.8xlarge
+      - i3.16xlarge
+      - x1.16xlarge
+      - x1.32xlarge
+      - p3.2xlarge
+      - p3.8xlarge
+      - p3.16xlarge
+      - r5.large
+      - r5.xlarge
+      - r5.2xlarge
+      - r5.4xlarge
+      - r5.12xlarge
+      - r5.24xlarge
+      - r5d.large
+      - r5d.xlarge
+      - r5d.2xlarge
+      - r5d.4xlarge
+      - r5d.12xlarge
+      - r5d.24xlarge
+      - z1d.large
+      - z1d.xlarge
+      - z1d.2xlarge
+      - z1d.3xlarge
+      - z1d.6xlarge
+      - z1d.12xlarge
+    ConstraintDescription: Must be a valid EC2 instance type
+    Description: Type of EC2 instance for the nodes.
+    Type: String
+  NumberOfNodes:
+    Default: 1
+    Description: Number of Amazon EKS node instances. The default is one for each Availability Zone.
+    Type: Number
+  Openpitrix:
+    Type: String
+    AllowedValues: [true, false]
+    Default: false
+    Description: '(Optional) An application store to package, deploy, and manage cloud-native applications in a multicloud environment.'
+  Devops:
+    Type: String
+    AllowedValues: [true, false]
+    Default: false
+    Description: '(Optional) Provides out-of-the-box CI/CD, based on Jenkins, and offers automated workflow tools including binary-to-image (B2I) and source-to-image (S2I).'
+  Servicemesh:
+    Type: String
+    AllowedValues: [true, false]
+    Default: false
+    Description: '(Optional) Provides resource-level management, observability, and tracing for distributed microservice applications. It also provides visualization for traffic topology.'
+  Kubeedge:
+    Type: String
+    AllowedValues: [true, false]
+    Default: false
+    Description: '(Optional) Add edge nodes to your cluster and run workloads on them.'
+  Alerting:
+    Type: String
+    AllowedValues: [true, false]
+    Default: false
+    Description: '(Optional) Users can customize alerting policies to send messages with different time intervals and alerting levels.'
+  Events:
+    Type: String
+    AllowedValues: [true, false]
+    Default: false
+    Description: '(Optional) Events that happen inside a cluster are recorded, such as container running status, image pulling failures, and node scheduling activities.'
+  Logging:
+    Type: String
+    AllowedValues: [true, false]
+    Default: false
+    Description: '(Optional) Flexible logging functions are provided for query, collection, and management. Additional log collectors can be added, such as Amazon Elasticsearch, Kafka, and Fluentd.'
+  Multicluster:
+    Type: String
+    AllowedValues: [none, host, member]
+    Default: none
+    Description: '(Optional) Users can create projects to run across clusters, which builds a container environment with rapid iterations and high availability.'
+  Networkpolicy:
+    Type: String
+    AllowedValues: [true, false]
+    Default: false
+    Description: '(Optional) Network policy configuration allows for network isolation within a cluster, which means firewalls can be set up between pods.'
+  Auditing:
+    Type: String
+    AllowedValues: [true, false]
+    Default: false
+    Description: '(Optional) DevOps console for developers to automatically create, build, test, and release applications.'
+  MetricsServer:
+    Type: String
+    AllowedValues: [true, false]
+    Default: true
+    Description: '(Optional) Users can install "MetricsServer" to enable HPA (Horizontal Pod Autoscaler), which automatically scales the number of pods, deployments, or stateful sets based on observed CPU utilization.'
+  PerAccountSharedResources:
+    Type: String
+    AllowedValues: [ 'AutoDetect', 'Yes', 'No' ]
+    Default: 'AutoDetect'
+    Description: Choose "No" if you already deployed another EKS Quick Start stack in your AWS account.
+  PerRegionSharedResources:
+    Type: String
+    AllowedValues: [ 'AutoDetect', 'Yes', 'No' ]
+    Default: 'AutoDetect'
+    Description: Choose "No" if you already deployed another EKS Quick Start stack in your Region.
+  ProvisionBastionHost:
+    Type: String
+    AllowedValues: [ "Enabled", "Disabled" ]
+    Default: "Enabled"
+    Description: Skip creating a bastion host by choosing "Disabled."
+Rules:
+  AZRule:
+    RuleCondition: !Equals [ !Ref 'AWS::Region', cn-north-1 ]
+    Assertions:
+      - Assert: !Equals [ !Ref NumberOfAZs, '2' ]
+        AssertDescription: To enable NAT gateways you must have both CreatePrivateSubnets and CreatePublicSubnets set to 'true'
+Conditions:
+  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
+  3AZDeployment: !Equals [!Ref NumberOfAZs, "3"]
+  2AZDeployment: !Or
+    - !Equals [!Ref NumberOfAZs, "2"]
+    - !Equals [!Ref NumberOfAZs, "3"]
+Resources:
+  VPCStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub
+        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/quickstart-aws-vpc/templates/aws-vpc.template.yaml'
+        - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+          S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      Parameters:
+        AvailabilityZones: !Join [ ',', !Ref 'AvailabilityZones' ]
+        NumberOfAZs: !Ref 'NumberOfAZs'
+        PrivateSubnet1ACIDR: !Ref 'PrivateSubnet1CIDR'
+        PrivateSubnet2ACIDR: !Ref 'PrivateSubnet2CIDR'
+        PrivateSubnet3ACIDR: !Ref 'PrivateSubnet3CIDR'
+        PrivateSubnetATag2: "kubernetes.io/role/internal-elb="
+        PrivateSubnetATag3: !Sub
+          - 'kubernetes.io/cluster/${X}-${AWS::Region}=owned'
+          - X: !Select [ 2, !Split ["/", !Ref 'AWS::StackId' ]]
+        PublicSubnet1CIDR: !Ref 'PublicSubnet1CIDR'
+        PublicSubnet2CIDR: !Ref 'PublicSubnet2CIDR'
+        PublicSubnet3CIDR: !Ref 'PublicSubnet3CIDR'
+        PublicSubnetTag2: "kubernetes.io/role/elb="
+        VPCCIDR: !Ref 'VPCCIDR'
+  EKSClusterStack:
+    DependsOn: VPCStack
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL:
+        !Sub
+          - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/quickstart-amazon-eks/templates/amazon-eks-entrypoint-existing-vpc.template.yaml'
+          - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+            S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      Parameters:
+        EKSClusterName: !Ref EKSClusterName
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3BucketRegion: !Ref QSS3BucketRegion
+        QSS3KeyPrefix: !Sub "${QSS3KeyPrefix}submodules/quickstart-amazon-eks/"
+        NumberOfNodes: !Ref NumberOfNodes
+        NodeInstanceType: !Ref NodeInstanceType
+        RemoteAccessCIDR: !Ref RemoteAccessCIDR
+        PerRegionSharedResources: !Ref PerRegionSharedResources
+        PerAccountSharedResources: !Ref PerAccountSharedResources
+        KeyPairName: !Ref 'KeyPairName'
+        PrivateSubnet1ID: !GetAtt VPCStack.Outputs.PrivateSubnet1AID
+        PublicSubnet1ID: !GetAtt VPCStack.Outputs.PublicSubnet1ID
+        PrivateSubnet2ID: !If
+          - 2AZDeployment
+          - !GetAtt VPCStack.Outputs.PrivateSubnet2AID
+          - !Ref AWS::NoValue
+        PrivateSubnet3ID: !If
+          - 3AZDeployment
+          - !GetAtt VPCStack.Outputs.PrivateSubnet3AID
+          - !Ref AWS::NoValue
+        PublicSubnet2ID: !If
+          - 2AZDeployment
+          - !GetAtt VPCStack.Outputs.PublicSubnet2ID
+          - !Ref AWS::NoValue
+        PublicSubnet3ID: !If
+          - 3AZDeployment
+          - !GetAtt VPCStack.Outputs.PublicSubnet3ID
+          - !Ref AWS::NoValue
+        VPCID: !GetAtt VPCStack.Outputs.VPCID
+        ProvisionBastionHost: !Ref ProvisionBastionHost
+        ALBIngressController: Disabled
+  KubeSphereStack:
+    DependsOn: EKSClusterStack
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL:
+        !Sub
+          - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/kubesphere.template.yaml'
+          - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+            S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      Parameters:
+        KubeClusterName: !GetAtt EKSClusterStack.Outputs.EKSClusterName
+        KubeConfigKmsContext: "EKSQuickStart"
+        Openpitrix: !Ref Openpitrix
+        Devops: !Ref Devops
+        Servicemesh: !Ref Servicemesh
+        Kubeedge: !Ref Kubeedge
+        Alerting: !Ref Alerting
+        Logging: !Ref Logging
+        Auditing: !Ref Auditing
+        Events: !Ref Events
+        Networkpolicy: !Ref Networkpolicy
+        MetricsServer: !Ref MetricsServer
+        Multicluster: !Ref Multicluster
+Outputs:
+  EKSClusterName:
+    Value: !GetAtt EKSClusterStack.Outputs.EKSClusterName
+  BastionIP:
+    Value: !GetAtt EKSClusterStack.Outputs.BastionIP
+  KubeSphereConsoleDefaultEndpoint:
+    Value: !GetAtt KubeSphereStack.Outputs.KubeSphereConsole
+  KubeSphereConsoleEndpoint:
+    Value: !GetAtt KubeSphereStack.Outputs.KubeSpherePortConsole
+  KubeSphereConsoleLoginUser:
+    Value: admin
+  KubeSphereConsoleDefaultAdminLoginPassword:
+    Value: !GetAtt KubeSphereStack.Outputs.KubeSphereConsoleDefaultAdminLoginPassword
