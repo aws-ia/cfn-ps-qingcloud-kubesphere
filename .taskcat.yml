@@ -1,5 +1,5 @@
 project:
-  name: quickstart-qingcloud-kubesphere
+  name: cfn-ps-qingcloud-kubesphere
   owner: quickstart-eng@amazon.com
   build_submodules: true
   package_lambda: true
