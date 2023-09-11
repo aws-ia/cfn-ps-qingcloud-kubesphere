@@ -1,9 +1,9 @@
-AWSTemplateFormatVersion: "2010-09-09"
+AWSTemplateFormatVersion: '2010-09-09'
 Description: Deploy Kubesphere into an existing Kubernetes Cluster (qs-1qtdde8cd)
 Parameters:
   KubeConfigKmsContext:
     Type: String
-    Default: "EKSQuickStart"
+    Default: EKSQuickStart
   KubeClusterName:
     Type: String
   Alerting:
@@ -28,19 +28,17 @@ Parameters:
     Type: String
   Kubeedge:
     Type: String
-
 Resources:
   KubeSphereCRD:
-    Type: "Custom::KubeManifest"
+    Type: Custom::KubeManifest
     Version: '1.0'
     Properties:
-      # The lambda function that executes the manifest against the cluster. This is created in one of the parent stacks
-      ServiceToken: !Sub "arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:EKS-QuickStart-KubeManifest-${KubeClusterName}"
-      # S3 path to the encrypted config file eg. s3://my-bucket/kube/config.encrypted
-      # context for KMS to use when decrypting the file
-      KubeConfigKmsContext: !Ref KubeConfigKmsContext
-      ClusterName: !Ref KubeClusterName
-      # Kubernetes manifest
+      ServiceToken:
+        Fn::Sub: arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:EKS-QuickStart-KubeManifest-${KubeClusterName}
+      KubeConfigKmsContext:
+        Ref: KubeConfigKmsContext
+      ClusterName:
+        Ref: KubeClusterName
       Manifest:
         apiVersion: apiextensions.k8s.io/v1
         kind: CustomResourceDefinition
@@ -49,38 +47,37 @@ Resources:
         spec:
           group: installer.kubesphere.io
           versions:
-          - name: v1alpha1
-            served: true
-            storage: true
-            schema:
-              openAPIV3Schema:
-                type: object
-                properties:
-                  spec:
-                    type: object
-                    x-kubernetes-preserve-unknown-fields: true
-                  status:
-                    type: object
-                    x-kubernetes-preserve-unknown-fields: true
+            - name: v1alpha1
+              served: true
+              storage: true
+              schema:
+                openAPIV3Schema:
+                  type: object
+                  properties:
+                    spec:
+                      type: object
+                      x-kubernetes-preserve-unknown-fields: true
+                    status:
+                      type: object
+                      x-kubernetes-preserve-unknown-fields: true
           scope: Namespaced
           names:
             plural: clusterconfigurations
             singular: clusterconfiguration
             kind: ClusterConfiguration
             shortNames:
-            - cc
+              - cc
   KubeSphereNamespace:
     DependsOn: KubeSphereCRD
-    Type: "Custom::KubeManifest"
+    Type: Custom::KubeManifest
     Version: '1.0'
     Properties:
-      # The lambda function that executes the manifest against the cluster. This is created in one of the parent stacks
-      ServiceToken: !Sub "arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:EKS-QuickStart-KubeManifest-${KubeClusterName}"
-      # S3 path to the encrypted config file eg. s3://my-bucket/kube/config.encrypted
-      # context for KMS to use when decrypting the file
-      KubeConfigKmsContext: !Ref KubeConfigKmsContext
-      ClusterName: !Ref KubeClusterName
-      # Kubernetes manifest
+      ServiceToken:
+        Fn::Sub: arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:EKS-QuickStart-KubeManifest-${KubeClusterName}
+      KubeConfigKmsContext:
+        Ref: KubeConfigKmsContext
+      ClusterName:
+        Ref: KubeClusterName
       Manifest:
         apiVersion: v1
         kind: Namespace
@@ -88,16 +85,15 @@ Resources:
           name: kubesphere-system
   KSInstallerServiceAccount:
     DependsOn: KubeSphereNamespace
-    Type: "Custom::KubeManifest"
+    Type: Custom::KubeManifest
     Version: '1.0'
     Properties:
-      # The lambda function that executes the manifest against the cluster. This is created in one of the parent stacks
-      ServiceToken: !Sub "arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:EKS-QuickStart-KubeManifest-${KubeClusterName}"
-      # S3 path to the encrypted config file eg. s3://my-bucket/kube/config.encrypted
-      # context for KMS to use when decrypting the file
-      KubeConfigKmsContext: !Ref KubeConfigKmsContext
-      ClusterName: !Ref KubeClusterName
-      # Kubernetes manifest
+      ServiceToken:
+        Fn::Sub: arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:EKS-QuickStart-KubeManifest-${KubeClusterName}
+      KubeConfigKmsContext:
+        Ref: KubeConfigKmsContext
+      ClusterName:
+        Ref: KubeClusterName
       Manifest:
         apiVersion: v1
         kind: ServiceAccount
@@ -106,16 +102,15 @@ Resources:
           namespace: kubesphere-system
   KSInstallerClusterRole:
     DependsOn: KubeSphereNamespace
-    Type: "Custom::KubeManifest"
+    Type: Custom::KubeManifest
     Version: '1.0'
     Properties:
-      # The lambda function that executes the manifest against the cluster. This is created in one of the parent stacks
-      ServiceToken: !Sub "arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:EKS-QuickStart-KubeManifest-${KubeClusterName}"
-      # S3 path to the encrypted config file eg. s3://my-bucket/kube/config.encrypted
-      # context for KMS to use when decrypting the file
-      KubeConfigKmsContext: !Ref KubeConfigKmsContext
-      ClusterName: !Ref KubeClusterName
-      # Kubernetes manifest
+      ServiceToken:
+        Fn::Sub: arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:EKS-QuickStart-KubeManifest-${KubeClusterName}
+      KubeConfigKmsContext:
+        Ref: KubeConfigKmsContext
+      ClusterName:
+        Ref: KubeClusterName
       Manifest:
         apiVersion: rbac.authorization.k8s.io/v1
         kind: ClusterRole
@@ -123,7 +118,7 @@ Resources:
           name: ks-installer
         rules:
           - apiGroups:
-              - ""
+              - ''
             resources:
               - '*'
             verbs:
@@ -328,41 +323,39 @@ Resources:
               - '*'
   KSInstallerClusterRoleBinding:
     DependsOn: KSInstallerClusterRole
-    Type: "Custom::KubeManifest"
+    Type: Custom::KubeManifest
     Version: '1.0'
     Properties:
-      # The lambda function that executes the manifest against the cluster. This is created in one of the parent stacks
-      ServiceToken: !Sub "arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:EKS-QuickStart-KubeManifest-${KubeClusterName}"
-      # S3 path to the encrypted config file eg. s3://my-bucket/kube/config.encrypted
-      # context for KMS to use when decrypting the file
-      KubeConfigKmsContext: !Ref KubeConfigKmsContext
-      ClusterName: !Ref KubeClusterName
-      # Kubernetes manifest
+      ServiceToken:
+        Fn::Sub: arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:EKS-QuickStart-KubeManifest-${KubeClusterName}
+      KubeConfigKmsContext:
+        Ref: KubeConfigKmsContext
+      ClusterName:
+        Ref: KubeClusterName
       Manifest:
         kind: ClusterRoleBinding
         apiVersion: rbac.authorization.k8s.io/v1
         metadata:
           name: ks-installer
         subjects:
-        - kind: ServiceAccount
-          name: ks-installer
-          namespace: kubesphere-system
+          - kind: ServiceAccount
+            name: ks-installer
+            namespace: kubesphere-system
         roleRef:
           kind: ClusterRole
           name: ks-installer
           apiGroup: rbac.authorization.k8s.io
   KubeSphereDeployment:
     DependsOn: KubeSphereNamespace
-    Type: "Custom::KubeManifest"
+    Type: Custom::KubeManifest
     Version: '1.0'
     Properties:
-      # The lambda function that executes the manifest against the cluster. This is created in one of the parent stacks
-      ServiceToken: !Sub "arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:EKS-QuickStart-KubeManifest-${KubeClusterName}"
-      # S3 path to the encrypted config file eg. s3://my-bucket/kube/config.encrypted
-      # context for KMS to use when decrypting the file
-      KubeConfigKmsContext: !Ref KubeConfigKmsContext
-      ClusterName: !Ref KubeClusterName
-      # Kubernetes manifest
+      ServiceToken:
+        Fn::Sub: arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:EKS-QuickStart-KubeManifest-${KubeClusterName}
+      KubeConfigKmsContext:
+        Ref: KubeConfigKmsContext
+      ClusterName:
+        Ref: KubeClusterName
       Manifest:
         apiVersion: apps/v1
         kind: Deployment
@@ -385,10 +378,10 @@ Resources:
               containers:
                 - name: installer
                   image: kubesphere/ks-installer:v3.2.1
-                  imagePullPolicy: "Always"
+                  imagePullPolicy: Always
                   resources:
                     limits:
-                      cpu: "1"
+                      cpu: '1'
                       memory: 1Gi
                     requests:
                       cpu: 20m
@@ -400,20 +393,19 @@ Resources:
               volumes:
                 - hostPath:
                     path: /etc/localtime
-                    type: ""
+                    type: ''
                   name: host-time
   KubesphereClusterConfiguration:
     DependsOn: KubeSphereDeployment
-    Type: "Custom::KubeManifest"
+    Type: Custom::KubeManifest
     Version: '1.0'
     Properties:
-      # The lambda function that executes the manifest against the cluster. This is created in one of the parent stacks
-      ServiceToken: !Sub "arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:EKS-QuickStart-KubeManifest-${KubeClusterName}"
-      # S3 path to the encrypted config file eg. s3://my-bucket/kube/config.encrypted
-      # context for KMS to use when decrypting the file
-      KubeConfigKmsContext: !Ref KubeConfigKmsContext
-      ClusterName: !Ref KubeClusterName
-      # Kubernetes manifest
+      ServiceToken:
+        Fn::Sub: arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:EKS-QuickStart-KubeManifest-${KubeClusterName}
+      KubeConfigKmsContext:
+        Ref: KubeConfigKmsContext
+      ClusterName:
+        Ref: KubeClusterName
       Manifest:
         apiVersion: installer.kubesphere.io/v1alpha1
         kind: ClusterConfiguration
@@ -424,10 +416,10 @@ Resources:
             version: v3.2.1
         spec:
           persistence:
-            storageClass: ""
+            storageClass: ''
           authentication:
-            jwtSecret: ""
-          local_registry: ""
+            jwtSecret: ''
+          local_registry: ''
           etcd:
             monitoring: false
             endpointIps: localhost
@@ -453,18 +445,18 @@ Resources:
                 enabled: false
             gpu:
               kinds:
-                - resourceName: "nvidia.com/gpu"
-                  resourceType: "GPU"
+                - resourceName: nvidia.com/gpu
+                  resourceType: GPU
                   default: true
             es:
               logMaxAge: 7
               elkPrefix: logstash
               basicAuth:
                 enabled: false
-                username: ""
-                password: ""
-              externalElasticsearchUrl: ""
-              externalElasticsearchPort: ""
+                username: ''
+                password: ''
+              externalElasticsearchUrl: ''
+              externalElasticsearchPort: ''
           alerting:
             enabled: ${Alerting}
           auditing:
@@ -488,7 +480,7 @@ Resources:
           metrics_server:
             enabled: ${MetricsServer}
           monitoring:
-            storageClass: ""
+            storageClass: ''
             gpu:
               nvidia_dcgm_exporter:
                 enabled: false
@@ -509,41 +501,43 @@ Resources:
           kubeedge:
             enabled: ${Kubeedge}
             cloudCore:
-              nodeSelector: {"node-role.kubernetes.io/worker": ""}
+              nodeSelector:
+                node-role.kubernetes.io/worker: ''
               tolerations: []
-              cloudhubPort: "10000"
-              cloudhubQuicPort: "10001"
-              cloudhubHttpsPort: "10002"
-              cloudstreamPort: "10003"
-              tunnelPort: "10004"
+              cloudhubPort: '10000'
+              cloudhubQuicPort: '10001'
+              cloudhubHttpsPort: '10002'
+              cloudstreamPort: '10003'
+              tunnelPort: '10004'
               cloudHub:
                 advertiseAddress:
-                  - ""
-                nodeLimit: "100"
+                  - ''
+                nodeLimit: '100'
               service:
-                cloudhubNodePort: "30000"
-                cloudhubQuicNodePort: "30001"
-                cloudhubHttpsNodePort: "30002"
-                cloudstreamNodePort: "30003"
-                tunnelNodePort: "30004"
+                cloudhubNodePort: '30000'
+                cloudhubQuicNodePort: '30001'
+                cloudhubHttpsNodePort: '30002'
+                cloudstreamNodePort: '30003'
+                tunnelNodePort: '30004'
             edgeWatcher:
-              nodeSelector: {"node-role.kubernetes.io/worker": ""}
+              nodeSelector:
+                node-role.kubernetes.io/worker: ''
               tolerations: []
               edgeWatcherAgent:
-                nodeSelector: {"node-role.kubernetes.io/worker": ""}
+                nodeSelector:
+                  node-role.kubernetes.io/worker: ''
                 tolerations: []
   KubeSphereService:
     DependsOn: KubesphereClusterConfiguration
-    Type: "Custom::KubeManifest"
+    Type: Custom::KubeManifest
     Version: '1.0'
     Properties:
-      # The lambda function that executes the manifest against the cluster. This is created in one of the parent stacks
-      ServiceToken: !Sub "arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:EKS-QuickStart-KubeManifest-${KubeClusterName}"
-      # S3 path to the encrypted config file eg. s3://my-bucket/kube/config.encrypted
-      # context for KMS to use when decrypting the file
-      KubeConfigKmsContext: !Ref KubeConfigKmsContext
-      ClusterName: !Ref KubeClusterName
-      # Kubernetes manifest
+      ServiceToken:
+        Fn::Sub: arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:EKS-QuickStart-KubeManifest-${KubeClusterName}
+      KubeConfigKmsContext:
+        Ref: KubeConfigKmsContext
+      ClusterName:
+        Ref: KubeClusterName
       Manifest:
         apiVersion: v1
         kind: Service
@@ -572,22 +566,26 @@ Resources:
           type: LoadBalancer
   KubeSphereConsole:
     DependsOn: KubeSphereService
-    Type: "Custom::KubeGet"
+    Type: Custom::KubeGet
     Version: '1.0'
     Properties:
-      ServiceToken: !Sub "arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:EKS-QuickStart-KubeGet-${KubeClusterName}"
-      KubeConfigKmsContext: !Ref KubeConfigKmsContext
-      ClusterName: !Ref KubeClusterName
+      ServiceToken:
+        Fn::Sub: arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:EKS-QuickStart-KubeGet-${KubeClusterName}
+      KubeConfigKmsContext:
+        Ref: KubeConfigKmsContext
+      ClusterName:
+        Ref: KubeClusterName
       Namespace: kubesphere-system
-      Name: 'svc/ks-console'
-      JsonPath: '{.status.loadBalancer.ingress[0].hostname}'  
-
+      Name: svc/ks-console
+      JsonPath: '{.status.loadBalancer.ingress[0].hostname}'
 Outputs:
   KubeSphereConsole:
-    Value: !Sub "http://${KubeSphereConsole}"
+    Value:
+      Fn::Sub: http://${KubeSphereConsole}
   KubeSpherePortConsole:
-    Value: !Sub "http://${KubeSphereConsole}:8000"
+    Value:
+      Fn::Sub: http://${KubeSphereConsole}:8000
   KubeSphereConsoleLoginUser:
     Value: admin
   KubeSphereConsoleDefaultAdminLoginPassword:
-    Value: "P@88w0rd"
+    Value: P@88w0rd
