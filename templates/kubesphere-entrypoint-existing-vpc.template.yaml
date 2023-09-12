@@ -533,3 +533,10 @@ Outputs:
       Fn::GetAtt:
         - KubeSphereStack
         - Outputs.KubeSphereConsoleDefaultAdminLoginPassword
+  AvailabilityZones:
+    Value: !Join
+        - ','
+        - !Ref AvailabilityZones
+  VPCCIDR:
+    Value:
+      Ref: VPCCIDR

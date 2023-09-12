@@ -589,3 +589,36 @@ Outputs:
     Value: admin
   KubeSphereConsoleDefaultAdminLoginPassword:
     Value: P@88w0rd
+  Alerting:
+    Value:
+      Ref: Alerting
+  Auditing:
+    Value:
+      Ref: Auditing
+  Devops:
+    Value:
+      Ref: Devops
+  Events:
+    Value:
+      Ref: Events
+  Logging:
+    Value:
+      Ref: Logging
+  MetricsServer:
+    Value:
+      Ref: MetricsServer
+  Multicluster:
+    Value:
+      Ref: Multicluster
+  Networkpolicy:
+    Value:
+      Ref: Networkpolicy
+  Openpitrix:
+    Value:
+      Ref: Openpitrix
+  Servicemesh:
+    Value:
+      Ref: Servicemesh
+  Kubeedge:
+    Value:
+      Ref: Kubeedge
