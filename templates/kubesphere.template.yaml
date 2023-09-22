@@ -1,5 +1,10 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Deploy Kubesphere into an existing Kubernetes Cluster (qs-1qtdde8cd)
+Metadata:
+  cfn-lint:
+    config:
+      ignore_checks:
+        - E1029
 Parameters:
   KubeConfigKmsContext:
     Type: String
