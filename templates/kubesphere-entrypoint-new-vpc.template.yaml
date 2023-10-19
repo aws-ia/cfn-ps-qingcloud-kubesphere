@@ -188,7 +188,7 @@ Parameters:
     ConstraintDescription: Quick Start bucket name can include numbers, lowercase
       letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen
       (-).
-    Default: aws-ia-us-east-1
+    Default: aws-ia
     Description: S3 bucket name for the Quick Start assets. This string can include
       numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start
       or end with a hyphen (-).
@@ -353,7 +353,7 @@ Rules:
       - Assert: !Equals [ !Ref NumberOfAZs, '2' ]
         AssertDescription: To enable NAT gateways you must have both CreatePrivateSubnets and CreatePublicSubnets set to 'true'
 Conditions:
-  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-ia-us-east-1']
+  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-ia']
   3AZDeployment: !Equals [!Ref NumberOfAZs, "3"]
   2AZDeployment: !Or
     - !Equals [!Ref NumberOfAZs, "2"]
